@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "vote")
+@Table(name = "votes")
 public class Vote {
     @Id
     private UUID id;

@@ -2,6 +2,7 @@ package com.bishop.heber.voting.security;
 
 import com.bishop.heber.voting.model.User;
 import com.bishop.heber.voting.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -25,7 +27,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         var authorities = user.getRoles().stream()
             .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName()))
             .collect(Collectors.toSet());
-
+        log.info("Loaded user '{}' with roles: {}", user.getUsername(),
+                authorities.stream().map(SimpleGrantedAuthority::getAuthority).toList());
         return new org.springframework.security.core.userdetails.User(
             user.getUsername(),
             user.getPassword(),
