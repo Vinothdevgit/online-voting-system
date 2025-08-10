@@ -1,23 +1,24 @@
 package com.bishop.heber.voting.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Data
 @Entity
 @Table(name = "candidates")
 public class Candidate {
     @Id
-    private String id;
+    private UUID id;
     private String name;
     private String description;
-
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    private String symbol; // 👈 new field (emoji or image URL)
+    // One candidate can have many promises
+    @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<CandidatePromise> promises = new ArrayList<>();
 }

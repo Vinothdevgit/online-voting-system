@@ -1,7 +1,9 @@
 package com.bishop.heber.voting.service.impl;
 
 import com.bishop.heber.voting.dto.VoteResultDto;
+import com.bishop.heber.voting.model.Candidate;
 import com.bishop.heber.voting.model.Vote;
+import com.bishop.heber.voting.repository.CandidateRepository;
 import com.bishop.heber.voting.repository.VoteRepository;
 import com.bishop.heber.voting.service.AdminService;
 import org.springframework.stereotype.Service;
@@ -13,18 +15,28 @@ import java.util.stream.Collectors;
 public class AdminServiceImpl implements AdminService {
 
     private final VoteRepository voteRepository;
+    private final CandidateRepository candidateRepository;
 
-    public AdminServiceImpl(VoteRepository voteRepository) {
+    public AdminServiceImpl(VoteRepository voteRepository, CandidateRepository candidateRepository) {
         this.voteRepository = voteRepository;
+        this.candidateRepository = candidateRepository;
     }
 
     @Override
     public List<VoteResultDto> getVoteSummary() {
-        List<Vote> votes = voteRepository.findAll();
-        return votes.stream()
-            .collect(Collectors.groupingBy(Vote::getCandidateId, Collectors.counting()))
-            .entrySet().stream()
-            .map(entry -> new VoteResultDto(entry.getKey(), entry.getValue()))
-            .collect(Collectors.toList());
+        List<Candidate> allCandidates = candidateRepository.findAll();
+
+        Map<UUID, Long> voteCounts = voteRepository.findAll().stream()
+                .collect(Collectors.groupingBy(v -> v.getCandidate().getId(), Collectors.counting()));
+
+        return allCandidates.stream()
+                .map(candidate -> new VoteResultDto(
+                        candidate.getId().toString(),
+                        candidate.getName(),
+                        voteCounts.getOrDefault(candidate.getId(), 0L)
+                ))
+                .collect(Collectors.toList());
     }
+
+
 }
