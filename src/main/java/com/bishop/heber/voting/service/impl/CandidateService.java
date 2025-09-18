@@ -44,4 +44,48 @@ public class CandidateService {
         // this will load promises as well.
         return candidateRepository.findAll();
     }
+
+    public Candidate updateCandidate(UUID id, CandidateRequest request) {
+        Candidate candidate = candidateRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Candidate not found: " + id));
+
+        // Basic fields (adapt to your DTO field names)
+        candidate.setName(request.getName());
+        candidate.setDescription(request.getDescription());
+        candidate.setSymbol(request.getSymbol());
+
+        // --- Replace promises ---
+        // Ensure your Candidate entity has orphanRemoval=true on promises collection.
+        // Clear existing promises; JPA will delete orphans.
+        if (candidate.getPromises() != null) {
+            candidate.getPromises().clear();
+        }
+
+        // Rebuild from request (expecting List<String> promises in DTO)
+        if (request.getPromises() != null) {
+            List<CandidatePromise> newPromises = request.getPromises().stream()
+                    .filter(p -> p != null && !p.isBlank())
+                    .map(p -> {
+                        CandidatePromise cp = new CandidatePromise();
+                        cp.setId(UUID.randomUUID());
+                        cp.setCandidate(candidate);
+                        cp.setPromiseText(p.trim());
+                        return cp;
+                    })
+                    .toList();
+
+            candidate.getPromises().addAll(newPromises);
+        }
+        return candidateRepository.save(candidate);
+    }
+
+    public void deleteCandidate(UUID id) {
+        if (!candidateRepository.existsById(id)) {
+            // Optional: throw if not found
+            // throw new IllegalArgumentException("Candidate not found: " + id);
+            return;
+        }
+        candidateRepository.deleteById(id);
+    }
+
 }

@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/admin")
@@ -34,5 +35,22 @@ public class CandidateController {
     //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Candidate>> getCandidates() {
         return ResponseEntity.ok(candidateService.getAllCandidates());
+    }
+
+    @PutMapping("/candidate/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Candidate> updateCandidate(
+            @PathVariable UUID id,
+            @RequestBody CandidateRequest request) {
+
+        Candidate updated = candidateService.updateCandidate(id, request);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/candidate/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteCandidate(@PathVariable UUID id) {
+        candidateService.deleteCandidate(id);
+        return ResponseEntity.noContent().build();
     }
 }
