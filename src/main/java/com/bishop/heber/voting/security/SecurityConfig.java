@@ -51,7 +51,8 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults()) // ← enable CORS handling
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // ← allow preflight
-                        .requestMatchers("/api/auth/**").permitAll() // login public
+                        .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/public/**").permitAll() // login public
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().authenticated()
                 )
