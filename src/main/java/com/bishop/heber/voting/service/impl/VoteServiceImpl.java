@@ -1,5 +1,6 @@
 package com.bishop.heber.voting.service.impl;
 
+import com.bishop.heber.voting.dto.CandidateResultDTO;
 import com.bishop.heber.voting.dto.VoteRequest;
 import com.bishop.heber.voting.model.Candidate;
 import com.bishop.heber.voting.model.Vote;
@@ -9,7 +10,10 @@ import com.bishop.heber.voting.service.VoteService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class VoteServiceImpl implements VoteService {
@@ -23,10 +27,10 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public String vote(String username, VoteRequest request) {
+    public boolean vote(String username, VoteRequest request) {
         String voterHash = String.valueOf(username.hashCode());
         if (voteRepository.existsByVoterHash(voterHash)) {
-            return "You have already voted.";
+            return false;
         }
 
         Candidate candidate = candidateRepository.findById(UUID.fromString(request.candidateId()))
@@ -39,6 +43,25 @@ public class VoteServiceImpl implements VoteService {
 
         voteRepository.save(vote);
 
-        return "Vote submitted successfully.";
+        return true;
+    }
+
+    public List<CandidateResultDTO> getResults() {
+        List<Object[]> rawResults = voteRepository.countVotesPerCandidate();
+        Map<UUID, Long> counts = rawResults.stream()
+                .collect(Collectors.toMap(
+                        r -> (UUID) r[0],
+                        r -> (Long) r[1]
+                ));
+
+        return candidateRepository.findAll().stream()
+                .map(c -> new CandidateResultDTO(
+                        c.getId(),
+                        c.getName(),
+                        c.getSymbol(),
+                        counts.getOrDefault(c.getId(), 0L)
+                ))
+                .sorted((a, b) -> Long.compare(b.getVotes(), a.getVotes())) // sort by votes desc
+                .toList();
     }
 }

@@ -1,5 +1,6 @@
 package com.bishop.heber.voting.controller;
 
+import com.bishop.heber.voting.dto.CandidateResultDTO;
 import com.bishop.heber.voting.dto.VoteRequest;
 import com.bishop.heber.voting.model.Candidate;
 import com.bishop.heber.voting.repository.CandidateRepository;
@@ -28,11 +29,20 @@ public class VoteController {
     public ResponseEntity<String> vote(@AuthenticationPrincipal String user,
                                        @RequestBody VoteRequest request) {
         log.info("User Details from JWT {} ",user);
-        return ResponseEntity.ok(voteService.vote(user, request));
+        if(voteService.vote(user, request))
+            return ResponseEntity.ok("Vote submitted successfully.");
+        else
+            return ResponseEntity.badRequest().body("Duplicate vote detected!!!");
     }
 
     @GetMapping("/candidates")
     public List<Candidate> getAllCandidates() {
         return candidateRepository.findAll();
+    }
+
+    @GetMapping("/vote/result")
+    public ResponseEntity<List<CandidateResultDTO>> getResults() {
+        List<CandidateResultDTO> results = voteService.getResults();
+        return ResponseEntity.ok(results);
     }
 }
