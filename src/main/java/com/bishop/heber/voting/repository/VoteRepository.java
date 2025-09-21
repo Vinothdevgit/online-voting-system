@@ -14,4 +14,7 @@ public interface VoteRepository extends JpaRepository<Vote, UUID> {
     @Query("SELECT new com.bishop.heber.voting.dto.VoteResultDto(v.candidate.name, COUNT(v)) FROM Vote v GROUP BY v.candidate.name")
     List<VoteResultDto> getVoteSummary();
 
+    @Query("SELECT v.candidate.id, COUNT(v) FROM Vote v GROUP BY v.candidate.id")
+    List<Object[]> countVotesPerCandidate();
+
 }
