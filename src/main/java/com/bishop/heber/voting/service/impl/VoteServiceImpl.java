@@ -3,6 +3,7 @@ package com.bishop.heber.voting.service.impl;
 import com.bishop.heber.voting.dto.CandidateResultDTO;
 import com.bishop.heber.voting.dto.VoteRequest;
 import com.bishop.heber.voting.model.Candidate;
+import com.bishop.heber.voting.model.CandidatePromise;
 import com.bishop.heber.voting.model.Vote;
 import com.bishop.heber.voting.repository.CandidateRepository;
 import com.bishop.heber.voting.repository.VoteRepository;
@@ -59,9 +60,17 @@ public class VoteServiceImpl implements VoteService {
                         c.getId(),
                         c.getName(),
                         c.getSymbol(),
-                        counts.getOrDefault(c.getId(), 0L)
-                ))
+                        counts.getOrDefault(c.getId(), 0L),
+                        getCandidatPromises(c.getPromises())
+                        ))
                 .sorted((a, b) -> Long.compare(b.getVotes(), a.getVotes())) // sort by votes desc
                 .toList();
+    }
+
+    private List<String> getCandidatPromises(List<CandidatePromise> candidatePromises){
+        return candidatePromises.stream()
+                .map(CandidatePromise::getPromiseText) // or .map(Object::toString)
+                .collect(Collectors.toList());
+
     }
 }
