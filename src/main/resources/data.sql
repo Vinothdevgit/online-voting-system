@@ -4,7 +4,3 @@ INSERT INTO online_voting.users (id, username, password, full_name, enabled) VAL
 
 INSERT INTO online_voting.roles (id, user_id, role_name) VALUES
 (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'ROLE_ADMIN');
-
-INSERT INTO online_voting.candidates (id, name, description) VALUES
-  ('cand1', 'Candidate A', 'Description A'),
-  ('cand2', 'Candidate B', 'Description B');
